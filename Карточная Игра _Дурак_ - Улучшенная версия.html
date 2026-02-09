@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<!-- saved from url=(0074)file:///C:/Users/%D1%81%D0%B0%D0%BC%D0%B0%D0%BD%D0%B4%D0%B0%D1%80/suk.html -->
+<html lang="ru"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карточная Игра "Дурак" - Улучшенная версия</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a5f23, #0d3b1a);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 2px solid #d4af37;
+        }
+        
+        h1 {
+            color: #f8de7e;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .info-item {
+            margin: 5px 10px;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            position: relative;
+        }
+        
+        .player-area {
+            background-color: rgba(139, 69, 19, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #8b4513;
+            min-height: 200px;
+            transition: all 0.3s;
+        }
+        
+        .player-area.active-turn {
+            background-color: rgba(139, 69, 19, 0.95);
+            box-shadow: 0 0 20px #ffd700;
+            animation: pulse-glow 2s infinite;
+        }
+        
+        .player-area.inactive {
+            opacity: 0.7;
+            filter: brightness(0.7);
+        }
+        
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #ffd700;
+        }
+        
+        .bot-area {
+            background-color: rgba(70, 130, 180, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #4682b4;
+            min-height: 200px;
+            transition: all 0.3s;
+        }
+        
+        .bot-area.active-turn {
+            background-color: rgba(70, 130, 180, 0.95);
+            box-shadow: 0 0 20px #87CEEB;
+            animation: pulse-glow-blue 2s infinite;
+        }
+        
+        .center-area {
+            flex-grow: 1;
+            background-color: rgba(34, 139, 34, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #228b22;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .deck-area {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            align-items: center;
+        }
+        
+        .deck {
+            width: 150px;
+            height: 100px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed #ccc;
+            font-weight: bold;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .deck:hover {
+            transform: scale(1.05);
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .trump-card {
+            width: 70px;
+            height: 100px;
+            background-color: white;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: black;
+            font-weight: bold;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            margin-left: 20px;
+        }
+        
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            min-height: 120px;
+        }
+        
+        .card {
+            width: 70px;
+            height: 100px;
+            background-color: white;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+            position: relative;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card.selected {
+            transform: translateY(-10px);
+            box-shadow: 0 0 20px #ffd700;
+            border: 2px solid #ffd700;
+        }
+        
+        .card.playable {
+            box-shadow: 0 0 15px #4CAF50;
+            border: 2px solid #4CAF50;
+            animation: pulse-green 2s infinite;
+        }
+        
+        .card.defendable {
+            box-shadow: 0 0 15px #2196F3;
+            border: 2px solid #2196F3;
+            animation: pulse-blue 2s infinite;
+        }
+        
+        .card.unplayable {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .card.hearts, .card.diamonds {
+            color: red;
+        }
+        
+        .card.spades, .card.clubs {
+            color: black;
+        }
+        
+        .card-back {
+            background: linear-gradient(45deg, #1a3c8b, #3a6bc9);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+        }
+        
+        .attack-area, .defend-area {
+            width: 90%;
+            min-height: 120px;
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background-color: #d4af37;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            min-width: 140px;
+        }
+        
+        button:hover {
+            background-color: #ffd700;
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background-color: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        
+        .card-value {
+            font-size: 1.5rem;
+        }
+        
+        .card-suit {
+            font-size: 1.2rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .game-result {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 100;
+            border: 3px solid #d4af37;
+            width: 80%;
+            max-width: 500px;
+        }
+        
+        .game-result h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+        
+        .rules-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #d4af37;
+            max-width: 300px;
+            z-index: 10;
+        }
+        
+        .rules-toggle {
+            background-color: #d4af37;
+            color: black;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        
+        .rules-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .rules-content.active {
+            max-height: 500px;
+        }
+        
+        .rules-content ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .rules-content li {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .bot-level-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #d4af37;
+            z-index: 10;
+        }
+        
+        .level-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .level-btn {
+            padding: 8px 15px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .level-btn.active {
+            background-color: #d4af37;
+            color: black;
+        }
+        
+        .auto-highlight-toggle {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #d4af37;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-play-instruction {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* YANGI QO'SHIMCHALAR */
+        .defense-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            border: 1px solid #2196F3;
+        }
+        
+        .turn-timer {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            border: 1px solid #d4af37;
+        }
+        
+        .card-counter {
+            display: inline-block;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        
+        .defense-status {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(33, 150, 243, 0.3);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            border: 1px solid #2196F3;
+        }
+        
+        .sound-toggle {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #d4af37;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quick-action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        
+        .quick-action-btn {
+            padding: 8px 15px;
+            background-color: rgba(33, 150, 243, 0.7);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+        
+        .quick-action-btn:hover {
+            background-color: rgba(33, 150, 243, 0.9);
+        }
+        
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 10px #4CAF50; }
+            50% { box-shadow: 0 0 20px #4CAF50; }
+            100% { box-shadow: 0 0 10px #4CAF50; }
+        }
+        
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 10px #2196F3; }
+            50% { box-shadow: 0 0 20px #2196F3; }
+            100% { box-shadow: 0 0 10px #2196F3; }
+        }
+        
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 10px #ffd700; }
+            50% { box-shadow: 0 0 20px #ffd700; }
+            100% { box-shadow: 0 0 10px #ffd700; }
+        }
+        
+        @keyframes pulse-glow-blue {
+            0% { box-shadow: 0 0 10px #87CEEB; }
+            50% { box-shadow: 0 0 20px #87CEEB; }
+            100% { box-shadow: 0 0 10px #87CEEB; }
+        }
+        
+        @keyframes card-move {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .card-move-animation {
+            animation: card-move 0.5s ease-in-out;
+        }
+        
+        @media (max-width: 768px) {
+            .card {
+                width: 50px;
+                height: 75px;
+            }
+            
+            .trump-card {
+                width: 50px;
+                height: 75px;
+            }
+            
+            .card-value {
+                font-size: 1.2rem;
+            }
+            
+            .card-suit {
+                font-size: 1rem;
+            }
+            
+            .control-buttons {
+                flex-wrap: wrap;
+            }
+            
+            .rules-panel, .bot-level-selector, .auto-highlight-toggle, .sound-toggle {
+                position: relative;
+                top: auto;
+                left: auto;
+                right: auto;
+                bottom: auto;
+                margin: 10px auto;
+                max-width: 100%;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .defense-counter, .turn-timer, .defense-status {
+                position: relative;
+                transform: none;
+                margin: 5px auto;
+                width: fit-content;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Панель правил -->
+        <div class="rules-panel">
+            <button class="rules-toggle" onclick="toggleRules()">Правила игры</button>
+            <div class="rules-content" id="rules-content">
+                <h3>Правила игры "Дурак":</h3>
+                <ul>
+                    <li><strong>Цель:</strong> Первым избавиться от всех карт</li>
+                    <li><strong>Начало:</strong> Каждый игрок получает 6 карт. Остальные карты остаются в колоде.</li>
+                    <li><strong>Козырь:</strong> Последняя карта в колоде является козырем. Козырные карты всегда сильнее других мастей.</li>
+                    <li><strong>Атака:</strong> Вы можете атаковать картой того же достоинства, что и карты на столе.</li>
+                    <li><strong>Защита:</strong> Вы должны защищаться картой большего достоинства той же масти или козырем.</li>
+                    <li><strong>Взять карты:</strong> Если вы не можете защититься, вы должны взять все карты со стола.</li>
+                    <li><strong>Победа:</strong> Когда карты в колоде заканчиваются, игрок без карт побеждает.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Выбор уровня бота -->
+        <div class="bot-level-selector">
+            <div>Уровень бота:</div>
+            <div class="level-buttons">
+                <button class="level-btn active" onclick="setBotLevel(&#39;easy&#39;)" id="easy-btn">Легкий</button>
+                <button class="level-btn" onclick="setBotLevel(&#39;medium&#39;)" id="medium-btn">Средний</button>
+                <button class="level-btn" onclick="setBotLevel(&#39;hard&#39;)" id="hard-btn">Сложный</button>
+            </div>
+        </div>
+        
+        <!-- Подсветка полезных карт -->
+        <div class="auto-highlight-toggle">
+            <input type="checkbox" id="auto-highlight" checked="" onchange="toggleAutoHighlight()">
+            <label for="auto-highlight">Подсвечивать полезные карты</label>
+        </div>
+        
+        <!-- Звук -->
+        <div class="sound-toggle">
+            <input type="checkbox" id="sound-toggle" checked="" onchange="toggleSound()">
+            <label for="sound-toggle">Звук</label>
+        </div>
+        
+        <header>
+            <h1>Карточная Игра "Дурак" <span class="card-counter" id="game-version">v2.0</span></h1>
+            <p>1. Выберите карту → 2. Нажмите "Атаковать" или "Защищаться" → 3. Нажмите "Готово" для передачи хода</p>
+        </header>
+        
+        <div class="game-info">
+            <div class="info-item">Карт у вас: <span id="player-count">5</span></div>
+            <div class="info-item">Карт у бота: <span id="bot-count">6</span></div>
+            <div class="info-item">Осталось в колоде: <span id="deck-count">24</span></div>
+            <div class="info-item">Ход: <span id="turn-indicator">Ваш ход</span></div>
+            <div class="info-item">Уровень бота: <span id="bot-level-indicator">Легкий</span></div>
+        </div>
+        
+        <div class="game-area">
+            <!-- Счетчик защиты и таймер -->
+            <div class="defense-counter" id="defense-counter">
+                Защищено: <span id="defended-count">0</span>/<span id="attack-count">1</span>
+            </div>
+            
+            <div class="turn-timer" id="turn-timer" style="border-color: rgb(244, 67, 54); background-color: rgba(244, 67, 54, 0.3);">
+                Ход: <span id="timer">0</span> сек
+            </div>
+            
+            <!-- Бот (противник) -->
+            <div class="bot-area inactive" id="bot-area">
+                <div class="player-header">
+                    <span>🤖 Бот (Противник)</span>
+                    <span>Карт: <span id="bot-cards-count">6</span></span>
+                </div>
+                <div class="card-container" id="bot-cards"><div class="card card-back">?</div><div class="card card-back">?</div><div class="card card-back">?</div><div class="card card-back">?</div><div class="card card-back">?</div><div class="card card-back">?</div></div>
+            </div>
+            
+            <!-- Центральная область -->
+            <div class="center-area">
+                <div class="status-message" id="status-message">⚔️ Вы атаковали: 6 ♦. Нажмите 'Готово', чтобы передать ход.</div>
+                
+                <div class="attack-area" id="attack-area"><div class="card diamonds card-move-animation">
+                    <div class="card-value">6</div>
+                    <div class="card-suit">♦</div>
+                </div></div>
+                
+                <div class="defend-area" id="defend-area"><div style="color: rgba(255,255,255,0.7)">Карты защиты появятся здесь</div></div>
+                
+                <!-- Статус защиты -->
+                <div class="defense-status" id="defense-status" style="background-color: rgba(76, 175, 80, 0.3); border-color: rgb(76, 175, 80);">
+                    Статус защиты: <span id="defense-status-text">Фаза атаки</span>
+                </div>
+                
+                <div class="deck-area">
+                    <div class="deck" id="deck" onclick="drawCardFromDeck()" title="Нажмите, чтобы взять карту (если можно)">
+                        <div class="card-back">?</div>
+                        <div style="position: absolute; bottom: 5px; font-size: 0.8rem;">Осталось: <span id="deck-count-small">24</span></div>
+                    </div>
+                    <div class="trump-card spades" id="trump-card">
+                <div class="card-value">7</div>
+                <div class="card-suit">♠</div>
+            </div>
+                    <div style="margin-left: 20px; text-align: center;">
+                        <div style="font-size: 0.9rem; margin-bottom: 5px;">Козырь:</div>
+                        <div id="trump-suit-name" style="font-weight: bold; font-size: 1.1rem;">Пики</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Игрок -->
+            <div class="player-area active-turn" id="player-area">
+                <div class="player-header">
+                    <span>🎮 Вы</span>
+                    <span>Карт: <span id="player-cards-count">5</span></span>
+                </div>
+                <div class="card-container" id="player-cards"><div class="card clubs" data-index="0">
+                    <div class="card-value">10</div>
+                    <div class="card-suit">♣</div>
+                </div><div class="card hearts" data-index="1">
+                    <div class="card-value">A</div>
+                    <div class="card-suit">♥</div>
+                </div><div class="card spades playable" data-index="2">
+                    <div class="card-value">6</div>
+                    <div class="card-suit">♠</div>
+                </div><div class="card clubs" data-index="3">
+                    <div class="card-value">8</div>
+                    <div class="card-suit">♣</div>
+                </div><div class="card diamonds" data-index="4">
+                    <div class="card-value">A</div>
+                    <div class="card-suit">♦</div>
+                </div></div>
+                
+                <!-- Быстрые действия -->
+                <div class="quick-action-buttons" id="quick-actions" style="display: none;">
+                    <button class="quick-action-btn" onclick="defendWithLowest()">Защита (мин)</button>
+                    <button class="quick-action-btn" onclick="defendWithTrump()">Защита (козырь)</button>
+                    <button class="quick-action-btn" onclick="autoDefendAll()">Автозащита</button>
+                </div>
+                
+                <div class="card-play-instruction" id="instruction-text">✅ Нажмите 'Готово', чтобы передать ход боту.</div>
+            </div>
+            
+            <!-- Кнопки управления -->
+            <div class="control-buttons">
+                <button id="attack-btn" onclick="playerAttack()" disabled="">⚔️ Атаковать</button>
+                <button id="defend-btn" onclick="playerDefend()" disabled="">🛡️ Защищаться</button>
+                <button id="take-btn" onclick="playerTake()" disabled="">📥 Взять карты</button>
+                <button id="pass-btn" onclick="playerPass()" disabled="">✅ Бито</button>
+                <button id="ready-btn" onclick="playerReady()" style="background-color: #4CAF50; color: white;">✅ Готово</button>
+                <button id="new-game-btn" onclick="startNewGame()">🔄 Новая игра</button>
+                <button id="hint-btn" onclick="showHint()" disabled="">💡 Подсказка</button>
+                <button id="auto-select-btn" onclick="autoSelectCard()" disabled="">🎯 Автовыбор</button>
+            </div>
+        </div>
+        
+        <!-- Окно результата игры -->
+        <div class="game-result hidden" id="game-result">
+            <h2 id="result-title">Игра Окончена!</h2>
+            <p id="result-message"></p>
+            <div style="margin-top: 20px;">
+                <button onclick="startNewGame()" style="margin-right: 10px;">🎮 Новая игра</button>
+                <button onclick="showStatistics()" style="background-color: #2196F3; color: white;">📊 Статистика</button>
+            </div>
+        </div>
+        
+        <!-- Окно статистики -->
+        <div class="game-result hidden" id="statistics-window">
+            <h2>📊 Статистика игры</h2>
+            <div style="text-align: left; margin: 20px 0;">
+                <p>Всего игр: <span id="total-games">0</span></p>
+                <p>Побед: <span id="wins">0</span></p>
+                <p>Поражений: <span id="losses">0</span></p>
+                <p>Ничьих: <span id="draws">0</span></p>
+                <p>Процент побед: <span id="win-rate">0%</span></p>
+                <hr style="margin: 15px 0;">
+                <p>Лучшая серия побед: <span id="best-streak">0</span></p>
+                <p>Всего сыграно карт: <span id="total-cards-played">0</span></p>
+            </div>
+            <button onclick="closeStatistics()">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        // Игровые переменные
+        let deck = [];
+        let playerHand = [];
+        let botHand = [];
+        let attackCards = [];
+        let defendCards = [];
+        let trumpSuit = '';
+        let isPlayerTurn = true;
+        let isAttackPhase = true;
+        let gameOver = false;
+        let botLevel = 'easy';
+        let playableCards = [];
+        let defendableCards = [];
+        let autoHighlightEnabled = true;
+        let selectedCardIndex = -1;
+        let cardsPlayedThisTurn = 0;
+        let playerHasActed = false;
+        let soundEnabled = true;
+        let turnTimer = 30;
+        let timerInterval;
+        let gameStatistics = {
+            totalGames: 0,
+            wins: 0,
+            losses: 0,
+            draws: 0,
+            bestWinStreak: 0,
+            currentStreak: 0,
+            totalCardsPlayed: 0
+        };
+
+        // Значения и масти карт
+        const cardValues = ['6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const cardSuits = ['hearts', 'diamonds', 'clubs', 'spades'];
+        const suitSymbols = {
+            'hearts': '♥',
+            'diamonds': '♦',
+            'clubs': '♣',
+            'spades': '♠'
+        };
+        const suitNames = {
+            'hearts': 'Черви',
+            'diamonds': 'Бубны',
+            'clubs': 'Трефы',
+            'spades': 'Пики'
+        };
+
+        // Начать игру
+        function initGame() {
+            // Создаем колоду карт
+            deck = [];
+            for (let suit of cardSuits) {
+                for (let value of cardValues) {
+                    deck.push({ suit, value });
+                }
+            }
+            
+            // Перемешиваем карты
+            shuffleDeck(deck);
+            
+            // Определяем козырную карту
+            trumpSuit = deck[deck.length - 1].suit;
+            
+            // Раздаем карты игрокам
+            playerHand = deck.splice(0, 6);
+            botHand = deck.splice(0, 6);
+            
+            // Сбрасываем состояние игры
+            attackCards = [];
+            defendCards = [];
+            playableCards = [];
+            defendableCards = [];
+            selectedCardIndex = -1;
+            isPlayerTurn = true;
+            isAttackPhase = true;
+            gameOver = false;
+            cardsPlayedThisTurn = 0;
+            playerHasActed = false;
+            turnTimer = 30;
+            
+            // Остановить старый таймер
+            if (timerInterval) clearInterval(timerInterval);
+            
+            // Запустить новый таймер
+            startTurnTimer();
+            
+            // Обновляем интерфейс
+            updateUI();
+            updateStatusMessage("Игра началась! Выберите карту для атаки.");
+            
+            // Показываем козырную масть
+            document.getElementById('trump-suit-name').textContent = suitNames[trumpSuit];
+            
+            // Обновляем инструкцию
+            updateInstruction();
+            
+            // Воспроизвести звук начала игры
+            playSound('start');
+        }
+
+        // Перемешать колоду
+        function shuffleDeck(deckArray) {
+            for (let i = deckArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deckArray[i], deckArray[j]] = [deckArray[j], deckArray[i]];
+            }
+        }
+
+        // Установить уровень бота
+        function setBotLevel(level) {
+            botLevel = level;
+            
+            // Активируем выбранную кнопку
+            document.getElementById('easy-btn').classList.remove('active');
+            document.getElementById('medium-btn').classList.remove('active');
+            document.getElementById('hard-btn').classList.remove('active');
+            document.getElementById(level + '-btn').classList.add('active');
+            
+            // Обновляем индикатор
+            let levelName = 'Легкий';
+            if (level === 'medium') levelName = 'Средний';
+            else if (level === 'hard') levelName = 'Сложный';
+            
+            document.getElementById('bot-level-indicator').textContent = levelName;
+            
+            if (!gameOver) {
+                updateStatusMessage(`Уровень бота изменен на ${levelName}.`);
+                playSound('click');
+            }
+        }
+
+        // Переключить подсветку полезных карт
+        function toggleAutoHighlight() {
+            autoHighlightEnabled = document.getElementById('auto-highlight').checked;
+            updateUI();
+            playSound('click');
+        }
+
+        // Переключить звук
+        function toggleSound() {
+            soundEnabled = document.getElementById('sound-toggle').checked;
+            playSound('click');
+        }
+
+        // Воспроизвести звук
+        function playSound(type) {
+            if (!soundEnabled) return;
+            
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                if (type === 'click') {
+                    // Звук клика
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                }
+                else if (type === 'card') {
+                    // Звук карты
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 600;
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                }
+                else if (type === 'win') {
+                    // Звук победы
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                }
+                else if (type === 'start') {
+                    // Звук начала игры
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(392.00, audioContext.currentTime); // G4
+                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime + 0.1); // C5
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.log("Звук не поддерживается");
+            }
+        }
+
+        // Открыть/закрыть панель правил
+        function toggleRules() {
+            const rulesContent = document.getElementById('rules-content');
+            rulesContent.classList.toggle('active');
+            
+            const toggleBtn = document.querySelector('.rules-toggle');
+            if (rulesContent.classList.contains('active')) {
+                toggleBtn.textContent = 'Закрыть правила';
+            } else {
+                toggleBtn.textContent = 'Правила игры';
+            }
+            playSound('click');
+        }
+
+        // Обновить интерфейс
+        function updateUI() {
+            // Показать карты игрока
+            updatePlayerCards();
+            
+            // Показать карты бота (рубашкой вверх)
+            updateBotCards();
+            
+            // Обновить области атаки и защиты
+            updateAttackArea();
+            updateDefendArea();
+            
+            // Показать козырную карту
+            updateTrumpCard();
+            
+            // Обновить информацию об игре
+            document.getElementById('player-count').textContent = playerHand.length;
+            document.getElementById('bot-count').textContent = botHand.length;
+            document.getElementById('deck-count').textContent = deck.length;
+            document.getElementById('deck-count-small').textContent = deck.length;
+            document.getElementById('player-cards-count').textContent = playerHand.length;
+            document.getElementById('bot-cards-count').textContent = botHand.length;
+            
+            // Показать, чей сейчас ход
+            const turnText = isPlayerTurn ? "Ваш ход" : "Ход бота";
+            document.getElementById('turn-indicator').textContent = turnText;
+            
+            // Обновить счетчик защиты
+            document.getElementById('defended-count').textContent = defendCards.length;
+            document.getElementById('attack-count').textContent = attackCards.length;
+            
+            // Обновить статус защиты
+            updateDefenseStatus();
+            
+            // Подсветить активного игрока
+            updateActivePlayerHighlight();
+            
+            // Обновить состояние кнопок
+            updateButtons();
+            
+            // Проверить, закончилась ли игра
+            checkGameEnd();
+            
+            // Подсветить играбельные карты (если нужно)
+            highlightPlayableCards();
+            
+            // Обновить инструкцию
+            updateInstruction();
+            
+            // Скрыть/показать быстрые действия
+            updateQuickActions();
+        }
+
+        // Подсветить активного игрока
+        function updateActivePlayerHighlight() {
+            const playerArea = document.getElementById('player-area');
+            const botArea = document.getElementById('bot-area');
+            
+            if (isPlayerTurn) {
+                playerArea.classList.add('active-turn');
+                botArea.classList.remove('active-turn');
+                playerArea.classList.remove('inactive');
+                botArea.classList.add('inactive');
+            } else {
+                botArea.classList.add('active-turn');
+                playerArea.classList.remove('active-turn');
+                botArea.classList.remove('inactive');
+                playerArea.classList.add('inactive');
+            }
+        }
+
+        // Обновить статус защиты
+        function updateDefenseStatus() {
+            const statusElement = document.getElementById('defense-status-text');
+            if (isAttackPhase) {
+                statusElement.textContent = "Фаза атаки";
+                document.getElementById('defense-status').style.backgroundColor = "rgba(76, 175, 80, 0.3)";
+                document.getElementById('defense-status').style.borderColor = "#4CAF50";
+            } else {
+                if (defendCards.length === attackCards.length) {
+                    statusElement.textContent = "Все защищены";
+                    document.getElementById('defense-status').style.backgroundColor = "rgba(76, 175, 80, 0.3)";
+                    document.getElementById('defense-status').style.borderColor = "#4CAF50";
+                } else if (defendCards.length > 0) {
+                    statusElement.textContent = `Защищено ${defendCards.length}/${attackCards.length}`;
+                    document.getElementById('defense-status').style.backgroundColor = "rgba(255, 193, 7, 0.3)";
+                    document.getElementById('defense-status').style.borderColor = "#FFC107";
+                } else {
+                    statusElement.textContent = "Не защищено";
+                    document.getElementById('defense-status').style.backgroundColor = "rgba(244, 67, 54, 0.3)";
+                    document.getElementById('defense-status').style.borderColor = "#F44336";
+                }
+            }
+        }
+
+        // Показать карты игрока
+        function updatePlayerCards() {
+            const playerCardsContainer = document.getElementById('player-cards');
+            playerCardsContainer.innerHTML = '';
+            
+            // Определить играбельные карты
+            identifyPlayableCards();
+            
+            playerHand.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = `card ${card.suit}`;
+                
+                // Если карта выбрана
+                if (index === selectedCardIndex) {
+                    cardElement.classList.add('selected');
+                }
+                
+                // Если карта играбельна
+                if (autoHighlightEnabled) {
+                    if (isAttackPhase && playableCards.includes(index)) {
+                        cardElement.classList.add('playable');
+                    } else if (!isAttackPhase && defendableCards.includes(index)) {
+                        cardElement.classList.add('defendable');
+                    } else if (isPlayerTurn && !playerHasActed && (isAttackPhase || !isAttackPhase)) {
+                        // Не блокируем карты во время защиты
+                    }
+                }
+                
+                cardElement.innerHTML = `
+                    <div class="card-value">${card.value}</div>
+                    <div class="card-suit">${suitSymbols[card.suit]}</div>
+                `;
+                cardElement.dataset.index = index;
+                
+                // Функция выбора карты
+                cardElement.addEventListener('click', () => selectCard(index));
+                
+                playerCardsContainer.appendChild(cardElement);
+            });
+        }
+
+        // Определить играбельные карты
+        function identifyPlayableCards() {
+            playableCards = [];
+            defendableCards = [];
+            
+            if (!isPlayerTurn) return;
+            
+            if (isAttackPhase) {
+                // Фаза атаки
+                if (attackCards.length === 0) {
+                    // Первая атака: все карты играбельны
+                    for (let i = 0; i < playerHand.length; i++) {
+                        playableCards.push(i);
+                    }
+                } else {
+                    // Последующие атаки: карты того же достоинства, что и на столе
+                    const tableValues = [...attackCards, ...defendCards].map(card => card.value);
+                    
+                    for (let i = 0; i < playerHand.length; i++) {
+                        if (tableValues.includes(playerHand[i].value)) {
+                            playableCards.push(i);
+                        }
+                    }
+                }
+            } else {
+                // Фаза защиты: находим карту, от которой нужно защищаться
+                if (attackCards.length > defendCards.length) {
+                    const attackingCard = attackCards[defendCards.length];
+                    
+                    for (let i = 0; i < playerHand.length; i++) {
+                        if (canDefend(attackingCard, playerHand[i])) {
+                            defendableCards.push(i);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Выбрать карту
+        function selectCard(index) {
+            if (!isPlayerTurn || gameOver) return;
+            
+            // Если уже совершили действие и нажали "Готово", нельзя выбирать новую карту
+            if (playerHasActed) {
+                updateStatusMessage("Сначала нажмите 'Готово' или отмените действие.");
+                return;
+            }
+            
+            let isValidSelection = false;
+            
+            if (isAttackPhase) {
+                // Проверка для фазы атаки
+                isValidSelection = playableCards.includes(index);
+                if (!isValidSelection) {
+                    updateStatusMessage("Эту карту сейчас нельзя использовать для атаки!");
+                    return;
+                }
+            } else {
+                // Проверка для фазы защиты
+                if (defendCards.length >= attackCards.length) {
+                    updateStatusMessage("Все карты уже защищены!");
+                    return;
+                }
+                isValidSelection = defendableCards.includes(index);
+                if (!isValidSelection) {
+                    updateStatusMessage("Этой картой нельзя защищаться сейчас!");
+                    return;
+                }
+            }
+            
+            // Если та же карта выбрана второй раз, отменить выбор
+            if (selectedCardIndex === index) {
+                selectedCardIndex = -1;
+                updateUI();
+                updateStatusMessage("Выбор карты отменен.");
+                return;
+            }
+            
+            selectedCardIndex = index;
+            updateUI();
+            
+            // Информация о выбранной карте
+            const card = playerHand[index];
+            let message = `Выбрана карта: ${card.value} ${suitSymbols[card.suit]}. `;
+            
+            if (isAttackPhase) {
+                message += "Нажмите 'Атаковать'.";
+            } else {
+                message += "Нажмите 'Защищаться'.";
+            }
+            
+            updateStatusMessage(message);
+            playSound('card');
+        }
+
+        // Подсветить играбельные карты
+        function highlightPlayableCards() {
+            // Эта функция теперь выполняется внутри updatePlayerCards()
+        }
+
+        // Показать карты бота (рубашкой вверх)
+        function updateBotCards() {
+            const botCardsContainer = document.getElementById('bot-cards');
+            botCardsContainer.innerHTML = '';
+            
+            for (let i = 0; i < botHand.length; i++) {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card card-back';
+                cardElement.textContent = '?';
+                
+                // Если уровень сложный, показать номер карты
+                if (botLevel === 'hard') {
+                    const cardCount = document.createElement('div');
+                    cardCount.style.position = 'absolute';
+                    cardCount.style.bottom = '5px';
+                    cardCount.style.fontSize = '0.7rem';
+                    cardCount.style.color = 'white';
+                    cardCount.textContent = `${i+1}`;
+                    cardElement.appendChild(cardCount);
+                }
+                
+                botCardsContainer.appendChild(cardElement);
+            }
+        }
+
+        // Обновить область атаки
+        function updateAttackArea() {
+            const attackArea = document.getElementById('attack-area');
+            attackArea.innerHTML = '';
+            
+            attackCards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = `card ${card.suit} card-move-animation`;
+                cardElement.innerHTML = `
+                    <div class="card-value">${card.value}</div>
+                    <div class="card-suit">${suitSymbols[card.suit]}</div>
+                `;
+                attackArea.appendChild(cardElement);
+            });
+            
+            // Если карт атаки нет
+            if (attackCards.length === 0) {
+                attackArea.innerHTML = '<div style="color: rgba(255,255,255,0.7)">Карты атаки появятся здесь</div>';
+            }
+        }
+
+        // Обновить область защиты
+        function updateDefendArea() {
+            const defendArea = document.getElementById('defend-area');
+            defendArea.innerHTML = '';
+            
+            defendCards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = `card ${card.suit} card-move-animation`;
+                cardElement.innerHTML = `
+                    <div class="card-value">${card.value}</div>
+                    <div class="card-suit">${suitSymbols[card.suit]}</div>
+                `;
+                defendArea.appendChild(cardElement);
+            });
+            
+            // Если карт защиты нет
+            if (defendCards.length === 0) {
+                defendArea.innerHTML = '<div style="color: rgba(255,255,255,0.7)">Карты защиты появятся здесь</div>';
+            }
+        }
+
+        // Показать козырную карту
+        function updateTrumpCard() {
+            const trumpCard = document.getElementById('trump-card');
+            
+            // Найти самую младшую козырную карту в колоде
+            let lowestTrumpCard = null;
+            for (let card of deck) {
+                if (card.suit === trumpSuit) {
+                    if (!lowestTrumpCard || cardValues.indexOf(card.value) < cardValues.indexOf(lowestTrumpCard.value)) {
+                        lowestTrumpCard = card;
+                    }
+                }
+            }
+            
+            // Если в колоде нет козырных карт
+            if (!lowestTrumpCard) {
+                lowestTrumpCard = { suit: trumpSuit, value: 'A' };
+            }
+            
+            trumpCard.className = `trump-card ${lowestTrumpCard.suit}`;
+            trumpCard.innerHTML = `
+                <div class="card-value">${lowestTrumpCard.value}</div>
+                <div class="card-suit">${suitSymbols[lowestTrumpCard.suit]}</div>
+            `;
+        }
+
+        // Обновить инструкцию
+        function updateInstruction() {
+            const instructionText = document.getElementById('instruction-text');
+            
+            if (!isPlayerTurn) {
+                instructionText.innerHTML = "🤖 Ход бота. Ждите...";
+                return;
+            }
+            
+            if (playerHasActed) {
+                instructionText.innerHTML = "✅ Нажмите 'Готово', чтобы передать ход боту.";
+                return;
+            }
+            
+            if (isAttackPhase) {
+                if (attackCards.length === 0) {
+                    instructionText.innerHTML = "⚔️ Выберите карту для первой атаки, затем нажмите 'Атаковать'.";
+                } else {
+                    instructionText.innerHTML = "⚔️ Выберите карту того же достоинства для продолжения атаки, затем нажмите 'Атаковать'.";
+                }
+            } else {
+                if (attackCards.length > defendCards.length) {
+                    const attackingCard = attackCards[defendCards.length];
+                    instructionText.innerHTML = `🛡️ Выберите карту для защиты от ${attackingCard.value}${suitSymbols[attackingCard.suit]}, затем нажмите 'Защищаться'.`;
+                } else {
+                    instructionText.innerHTML = "✅ Все карты атаки защищены. Нажмите 'Готово'.";
+                }
+            }
+        }
+
+        // Обновить быстрые действия
+        function updateQuickActions() {
+            const quickActions = document.getElementById('quick-actions');
+            
+            // Показывать быстрые действия только во время защиты игрока
+            if (isPlayerTurn && !isAttackPhase && !playerHasActed && attackCards.length > defendCards.length) {
+                quickActions.style.display = 'flex';
+            } else {
+                quickActions.style.display = 'none';
+            }
+        }
+
+        // Обновить состояние кнопок
+        function updateButtons() {
+            const attackBtn = document.getElementById('attack-btn');
+            const defendBtn = document.getElementById('defend-btn');
+            const takeBtn = document.getElementById('take-btn');
+            const passBtn = document.getElementById('pass-btn');
+            const readyBtn = document.getElementById('ready-btn');
+            const hintBtn = document.getElementById('hint-btn');
+            const autoSelectBtn = document.getElementById('auto-select-btn');
+            
+            // Кнопка атаки
+            attackBtn.disabled = !isPlayerTurn || !isAttackPhase || selectedCardIndex === -1 || gameOver || playerHasActed;
+            
+            // Кнопка защиты - ИСПРАВЛЕНО: можно защищаться, если есть карта для защиты
+            defendBtn.disabled = !isPlayerTurn || isAttackPhase || gameOver || 
+                                selectedCardIndex === -1 || defendCards.length >= attackCards.length;
+            
+            // Кнопка "Взять карты"
+            takeBtn.disabled = !isPlayerTurn || isAttackPhase || gameOver || playerHasActed;
+            
+            // Кнопка "Бито" - можно нажать, если есть хотя бы одна защищенная карта
+            passBtn.disabled = !isPlayerTurn || gameOver || defendCards.length === 0 || playerHasActed || defendCards.length < attackCards.length;
+            
+            // Кнопка "Готово" - активна когда игрок совершил действие ИЛИ когда все карты защищены
+            readyBtn.disabled = !isPlayerTurn || gameOver || (!playerHasActed && defendCards.length < attackCards.length);
+            
+            // Кнопка подсказки
+            hintBtn.disabled = !isPlayerTurn || gameOver || playerHasActed;
+            
+            // Кнопка автовыбора
+            autoSelectBtn.disabled = !isPlayerTurn || gameOver || playerHasActed;
+            
+            // Если не ход игрока, отключить все кнопки
+            if (!isPlayerTurn) {
+                attackBtn.disabled = true;
+                defendBtn.disabled = true;
+                takeBtn.disabled = true;
+                passBtn.disabled = true;
+                readyBtn.disabled = true;
+                hintBtn.disabled = true;
+                autoSelectBtn.disabled = true;
+            }
+        }
+
+        // Игрок атакует
+        function playerAttack() {
+            if (!isPlayerTurn || !isAttackPhase || selectedCardIndex === -1 || playerHasActed) return;
+            
+            const card = playerHand[selectedCardIndex];
+            
+            // Если выбранная карта не может атаковать
+            if (!playableCards.includes(selectedCardIndex)) {
+                updateStatusMessage("Этой картой нельзя атаковать!");
+                selectedCardIndex = -1;
+                updateUI();
+                return;
+            }
+            
+            // Если это не первая карта атаки, достоинство должно совпадать
+            if (attackCards.length > 0) {
+                const hasMatchingValue = attackCards.some(c => c.value === card.value) || 
+                                        defendCards.some(c => c.value === card.value);
+                
+                if (!hasMatchingValue) {
+                    updateStatusMessage("Для атаки нужно выбрать карту того же достоинства, что и на столе!");
+                    selectedCardIndex = -1;
+                    updateUI();
+                    return;
+                }
+            }
+            
+            // Добавить карту в карты атаки
+            attackCards.push(card);
+            playerHand.splice(selectedCardIndex, 1);
+            cardsPlayedThisTurn++;
+            playerHasActed = true;
+            gameStatistics.totalCardsPlayed++;
+            
+            updateStatusMessage(`⚔️ Вы атаковали: ${card.value} ${suitSymbols[card.suit]}. Нажмите 'Готово', чтобы передать ход.`);
+            playSound('card');
+            
+            selectedCardIndex = -1;
+            updateUI();
+        }
+
+        // Игрок защищается - ИСПРАВЛЕННАЯ ФУНКЦИЯ
+        function playerDefend() {
+            if (!isPlayerTurn || isAttackPhase || selectedCardIndex === -1 || playerHasActed) return;
+            
+            // Проверить, есть ли карты для защиты
+            if (defendCards.length >= attackCards.length) {
+                updateStatusMessage("Все карты уже защищены!");
+                return;
+            }
+            
+            const defendingCard = playerHand[selectedCardIndex];
+            const attackingCard = attackCards[defendCards.length];
+            
+            // Проверить, может ли карта защищаться
+            if (canDefend(attackingCard, defendingCard)) {
+                // Добавить карту в карты защиты
+                defendCards.push(defendingCard);
+                playerHand.splice(selectedCardIndex, 1);
+                cardsPlayedThisTurn++;
+                playerHasActed = true;
+                gameStatistics.totalCardsPlayed++;
+                
+                updateStatusMessage(`🛡️ Вы защитились: ${attackingCard.value}${suitSymbols[attackingCard.suit]} → ${defendingCard.value}${suitSymbols[defendingCard.suit]}.`);
+                playSound('card');
+                
+                // Проверить, все ли карты защищены
+                if (defendCards.length === attackCards.length) {
+                    updateStatusMessage("✅ Все карты атаки защищены! Нажмите 'Готово'.");
+                } else {
+                    // Если еще есть карты для защиты, разрешить выбрать следующую карту
+                    setTimeout(() => {
+                        playerHasActed = false;
+                        selectedCardIndex = -1;
+                        updateUI();
+                        updateStatusMessage(`Выберите карту для защиты от следующей атаки (${defendCards.length}/${attackCards.length} защищено).`);
+                    }, 1000);
+                }
+                
+                selectedCardIndex = -1;
+                updateUI();
+            } else {
+                updateStatusMessage("❌ Этой картой нельзя защититься. Выберите карту большего достоинства той же масти или козырь.");
+                selectedCardIndex = -1;
+                updateUI();
+                return;
+            }
+        }
+
+        // Игрок нажимает "Готово" - передать ход боту - ИСПРАВЛЕНО
+        function playerReady() {
+            if (!isPlayerTurn || gameOver) return;
+            
+            // Если игрок не совершил действие, но все карты защищены, можно завершить раунд
+            if (!playerHasActed && defendCards.length < attackCards.length) {
+                updateStatusMessage("Сначала защититесь от всех карт или возьмите карты!");
+                return;
+            }
+            
+            if (isAttackPhase) {
+                // После атаки: передать ход боту для защиты
+                updateStatusMessage("⚔️ Вы завершили атаку. Теперь бот будет защищаться.");
+                isPlayerTurn = false;
+                isAttackPhase = false;
+                playerHasActed = false;
+                cardsPlayedThisTurn = 0;
+                selectedCardIndex = -1;
+                
+                updateUI();
+                
+                // Через 1.5 секунды бот ответит
+                setTimeout(() => {
+                    botDefend();
+                }, 1500);
+            } else {
+                // После защиты: проверить, все ли карты защищены
+                if (defendCards.length === attackCards.length) {
+                    // Все карты защищены - завершить раунд
+                    updateStatusMessage("✅ Вы успешно защитились! Раунд окончен.");
+                    setTimeout(() => {
+                        completeDefense();
+                    }, 1000);
+                } else {
+                    // Не все карты защищены - игрок должен взять карты
+                    updateStatusMessage("❌ Вы не защитились от всех карт. Вы должны взять все карты.");
+                    setTimeout(() => {
+                        playerTake();
+                    }, 1000);
+                }
+            }
+            playSound('click');
+        }
+
+        // Проверить, может ли карта защищаться
+        function canDefend(attackingCard, defendingCard) {
+            // Если карта защиты - козырь, а карта атаки - нет
+            if (defendingCard.suit === trumpSuit && attackingCard.suit !== trumpSuit) {
+                return true;
+            }
+            
+            // Если обе карты одной масти
+            if (defendingCard.suit === attackingCard.suit) {
+                // Сравнить значения
+                const attackValueIndex = cardValues.indexOf(attackingCard.value);
+                const defendValueIndex = cardValues.indexOf(defendingCard.value);
+                return defendValueIndex > attackValueIndex;
+            }
+            
+            return false;
+        }
+
+        // Взять карту из колоды
+        function drawCardFromDeck() {
+            if (!isPlayerTurn || deck.length === 0 || playerHasActed) return;
+            
+            // Если фаза атаки и не атаковали, нельзя взять карту
+            if (isAttackPhase && attackCards.length === 0) {
+                updateStatusMessage("Сначала нужно атаковать!");
+                return;
+            }
+            
+            // Если фаза защиты и не защищались, нельзя взять карту
+            if (!isAttackPhase && defendCards.length === 0) {
+                updateStatusMessage("Сначала нужно защититься!");
+                return;
+            }
+            
+            // Взять карту
+            if (playerHand.length < 6 && deck.length > 0) {
+                const drawnCard = deck.shift();
+                playerHand.push(drawnCard);
+                updateStatusMessage(`📥 Вы взяли карту: ${drawnCard.value} ${suitSymbols[drawnCard.suit]}! Нажмите 'Готово', чтобы передать ход.`);
+                playerHasActed = true;
+                playSound('card');
+                updateUI();
+            }
+        }
+
+        // Защита завершена
+        function completeDefense() {
+            // Очистить карты атаки и защиты
+            attackCards = [];
+            defendCards = [];
+            
+            // Пополнить руки
+            refillHands();
+            
+            // Установить ход бота и перейти к фазе атаки
+            isPlayerTurn = false;
+            isAttackPhase = true;
+            playerHasActed = false;
+            cardsPlayedThisTurn = 0;
+            selectedCardIndex = -1;
+            
+            updateUI();
+            
+            // Бот начинает атаку
+            setTimeout(() => {
+                botAttack();
+            }, 1500);
+        }
+
+        // Игрок берет карты
+        function playerTake() {
+            if (!isPlayerTurn || isAttackPhase || playerHasActed) return;
+            
+            // Добавить все карты атаки и защиты в руку игрока
+            playerHand = playerHand.concat(attackCards, defendCards);
+            attackCards = [];
+            defendCards = [];
+            selectedCardIndex = -1;
+            playerHasActed = true;
+            
+            updateStatusMessage("📥 Вы взяли все карты. Нажмите 'Готово', чтобы передать ход боту.");
+            playSound('card');
+            
+            // Пополнить руки
+            refillHands();
+            
+            updateUI();
+        }
+
+        // Игрок говорит "Бито"
+        function playerPass() {
+            if (!isPlayerTurn || attackCards.length === 0 || playerHasActed || defendCards.length < attackCards.length) return;
+            
+            // Защита успешно завершена
+            updateStatusMessage("✅ Вы успешно защитились! 'Бито'!");
+            completeDefense();
+        }
+
+        // Автоматический выбор карты
+        function autoSelectCard() {
+            if (!isPlayerTurn || gameOver || playerHasActed) return;
+            
+            let bestCardIndex = -1;
+            
+            if (isAttackPhase) {
+                // Фаза атаки: выбрать лучшую карту для атаки
+                if (playableCards.length > 0) {
+                    // Самая младшая некозырная карта
+                    for (let i = 0; i < playableCards.length; i++) {
+                        const index = playableCards[i];
+                        const card = playerHand[index];
+                        
+                        if (card.suit !== trumpSuit) {
+                            if (bestCardIndex === -1 || cardValues.indexOf(card.value) < cardValues.indexOf(playerHand[bestCardIndex].value)) {
+                                bestCardIndex = index;
+                            }
+                        }
+                    }
+                    
+                    // Если остались только козырные карты
+                    if (bestCardIndex === -1 && playableCards.length > 0) {
+                        bestCardIndex = playableCards[0];
+                    }
+                }
+            } else {
+                // Фаза защиты: выбрать лучшую карту для защиты
+                if (defendableCards.length > 0) {
+                    // Самая младшая некозырная карта
+                    for (let i = 0; i < defendableCards.length; i++) {
+                        const index = defendableCards[i];
+                        const card = playerHand[index];
+                        
+                        if (card.suit !== trumpSuit) {
+                            if (bestCardIndex === -1 || cardValues.indexOf(card.value) < cardValues.indexOf(playerHand[bestCardIndex].value)) {
+                                bestCardIndex = index;
+                            }
+                        }
+                    }
+                    
+                    // Если остались только козырные карты
+                    if (bestCardIndex === -1 && defendableCards.length > 0) {
+                        bestCardIndex = defendableCards[0];
+                    }
+                }
+            }
+            
+            if (bestCardIndex !== -1) {
+                selectedCardIndex = bestCardIndex;
+                const card = playerHand[bestCardIndex];
+                updateStatusMessage(`🎯 Автовыбор: ${card.value} ${suitSymbols[card.suit]}`);
+                updateUI();
+                playSound('click');
+            } else {
+                updateStatusMessage("Нет подходящей карты для автовыбора.");
+            }
+        }
+
+        // Защититься самой младшей картой
+        function defendWithLowest() {
+            if (!isPlayerTurn || isAttackPhase || playerHasActed || defendCards.length >= attackCards.length) return;
+            
+            const attackingCard = attackCards[defendCards.length];
+            let bestDefenseIndex = -1;
+            
+            // Найти самую младшую некозырную карту для защиты
+            for (let i = 0; i < playerHand.length; i++) {
+                if (canDefend(attackingCard, playerHand[i]) && playerHand[i].suit !== trumpSuit) {
+                    if (bestDefenseIndex === -1 || cardValues.indexOf(playerHand[i].value) < cardValues.indexOf(playerHand[bestDefenseIndex].value)) {
+                        bestDefenseIndex = i;
+                    }
+                }
+            }
+            
+            // Если не нашли некозырную, ищем козырную
+            if (bestDefenseIndex === -1) {
+                for (let i = 0; i < playerHand.length; i++) {
+                    if (canDefend(attackingCard, playerHand[i])) {
+                        if (bestDefenseIndex === -1 || cardValues.indexOf(playerHand[i].value) < cardValues.indexOf(playerHand[bestDefenseIndex].value)) {
+                            bestDefenseIndex = i;
+                        }
+                    }
+                }
+            }
+            
+            if (bestDefenseIndex !== -1) {
+                selectedCardIndex = bestDefenseIndex;
+                updateUI();
+                playerDefend();
+            } else {
+                updateStatusMessage("Нет подходящей карты для защиты.");
+            }
+        }
+
+        // Защититься козырем
+        function defendWithTrump() {
+            if (!isPlayerTurn || isAttackPhase || playerHasActed || defendCards.length >= attackCards.length) return;
+            
+            const attackingCard = attackCards[defendCards.length];
+            let trumpDefenseIndex = -1;
+            
+            // Найти козырную карту для защиты
+            for (let i = 0; i < playerHand.length; i++) {
+                if (playerHand[i].suit === trumpSuit && canDefend(attackingCard, playerHand[i])) {
+                    if (trumpDefenseIndex === -1 || cardValues.indexOf(playerHand[i].value) < cardValues.indexOf(playerHand[trumpDefenseIndex].value)) {
+                        trumpDefenseIndex = i;
+                    }
+                }
+            }
+            
+            if (trumpDefenseIndex !== -1) {
+                selectedCardIndex = trumpDefenseIndex;
+                updateUI();
+                playerDefend();
+            } else {
+                updateStatusMessage("Нет подходящего козыря для защиты.");
+            }
+        }
+
+        // Автоматическая защита от всех карт
+        function autoDefendAll() {
+            if (!isPlayerTurn || isAttackPhase || playerHasActed) return;
+            
+            let allDefended = true;
+            
+            // Попытаться защититься от всех оставшихся карт
+            while (defendCards.length < attackCards.length && allDefended) {
+                const attackingCard = attackCards[defendCards.length];
+                let foundDefense = false;
+                
+                for (let i = 0; i < playerHand.length; i++) {
+                    if (canDefend(attackingCard, playerHand[i])) {
+                        // Временно защищаемся этой картой
+                        defendCards.push(playerHand[i]);
+                        playerHand.splice(i, 1);
+                        gameStatistics.totalCardsPlayed++;
+                        foundDefense = true;
+                        break;
+                    }
+                }
+                
+                if (!foundDefense) {
+                    allDefended = false;
+                    // Откатываем изменения
+                    playerHand = playerHand.concat(defendCards);
+                    defendCards = [];
+                    break;
+                }
+            }
+            
+            if (allDefended && defendCards.length === attackCards.length) {
+                updateStatusMessage("✅ Автозащита успешна! Все карты защищены.");
+                playerHasActed = true;
+                updateUI();
+                playSound('card');
+            } else {
+                updateStatusMessage("❌ Невозможно защититься от всех карт автоматически.");
+                updateUI();
+            }
+        }
+
+        // Бот атакует (в зависимости от уровня)
+        function botAttack() {
+            if (isPlayerTurn || gameOver) return;
+            
+            updateStatusMessage("🤖 Бот атакует...");
+            
+            // Через 1 секунду бот делает ход
+            setTimeout(() => {
+                // Бот выбирает карту для атаки
+                let selectedCardIndex = -1;
+                
+                // Стратегия в зависимости от уровня
+                if (botLevel === 'easy') {
+                    // Легкий уровень: случайная карта
+                    if (attackCards.length === 0) {
+                        // Первая атака: случайная карта
+                        if (botHand.length > 0) {
+                            selectedCardIndex = Math.floor(Math.random() * botHand.length);
+                        }
+                    } else {
+                        // Последующие атаки: карты того же достоинства, что и на столе
+                        const tableValues = [...attackCards, ...defendCards].map(card => card.value);
+                        const possibleCards = [];
+                        
+                        for (let i = 0; i < botHand.length; i++) {
+                            if (tableValues.includes(botHand[i].value)) {
+                                possibleCards.push(i);
+                            }
+                        }
+                        
+                        if (possibleCards.length > 0) {
+                            selectedCardIndex = possibleCards[Math.floor(Math.random() * possibleCards.length)];
+                        }
+                    }
+                } else if (botLevel === 'medium') {
+                    // Средний уровень: самая младшая карта
+                    if (attackCards.length === 0) {
+                        // Первая атака: самая младшая карта
+                        for (let i = 0; i < botHand.length; i++) {
+                            if (selectedCardIndex === -1 || cardValues.indexOf(botHand[i].value) < cardValues.indexOf(botHand[selectedCardIndex].value)) {
+                                selectedCardIndex = i;
+                            }
+                        }
+                    } else {
+                        // Последующие атаки: самая младшая карта того же достоинства
+                        const tableValues = [...attackCards, ...defendCards].map(card => card.value);
+                        let minCardIndex = -1;
+                        
+                        for (let i = 0; i < botHand.length; i++) {
+                            if (tableValues.includes(botHand[i].value)) {
+                                if (minCardIndex === -1 || cardValues.indexOf(botHand[i].value) < cardValues.indexOf(botHand[minCardIndex].value)) {
+                                    minCardIndex = i;
+                                }
+                            }
+                        }
+                        
+                        selectedCardIndex = minCardIndex;
+                    }
+                } else {
+                    // Сложный уровень: стратегический выбор
+                    if (attackCards.length === 0) {
+                        // Первая атака: самая младшая некозырная карта
+                        let minNonTrumpIndex = -1;
+                        for (let i = 0; i < botHand.length; i++) {
+                            if (botHand[i].suit !== trumpSuit) {
+                                if (minNonTrumpIndex === -1 || cardValues.indexOf(botHand[i].value) < cardValues.indexOf(botHand[minNonTrumpIndex].value)) {
+                                    minNonTrumpIndex = i;
+                                }
+                            }
+                        }
+                        
+                        // Если остались только козырные карты
+                        if (minNonTrumpIndex === -1) {
+                            // Самая младшая козырная карта
+                            for (let i = 0; i < botHand.length; i++) {
+                                if (selectedCardIndex === -1 || cardValues.indexOf(botHand[i].value) < cardValues.indexOf(botHand[selectedCardIndex].value)) {
+                                    selectedCardIndex = i;
+                                }
+                            }
+                        } else {
+                            selectedCardIndex = minNonTrumpIndex;
+                        }
+                    } else {
+                        // Последующие атаки: стратегический выбор
+                        const tableValues = [...attackCards, ...defendCards].map(card => card.value);
+                        let bestCardIndex = -1;
+                        
+                        // 1. Предпочитает младшие некозырные карты
+                        for (let i = 0; i < botHand.length; i++) {
+                            if (tableValues.includes(botHand[i].value) && botHand[i].suit !== trumpSuit) {
+                                if (bestCardIndex === -1 || cardValues.indexOf(botHand[i].value) < cardValues.indexOf(botHand[bestCardIndex].value)) {
+                                    bestCardIndex = i;
+                                }
+                            }
+                        }
+                        
+                        // 2. Если нет, выбирает младшие козырные карты
+                        if (bestCardIndex === -1) {
+                            for (let i = 0; i < botHand.length; i++) {
+                                if (tableValues.includes(botHand[i].value)) {
+                                    if (bestCardIndex === -1 || cardValues.indexOf(botHand[i].value) < cardValues.indexOf(botHand[bestCardIndex].value)) {
+                                        bestCardIndex = i;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        selectedCardIndex = bestCardIndex;
+                    }
+                }
+                
+                // Если подходящая карта не найдена, не может атаковать
+                if (selectedCardIndex === -1) {
+                    updateStatusMessage("🤖 Бот не может атаковать. Ваш ход.");
+                    isPlayerTurn = true;
+                    isAttackPhase = true;
+                    playerHasActed = false;
+                    updateUI();
+                    return;
+                }
+                
+                // Добавить карту в карты атаки
+                const selectedCard = botHand[selectedCardIndex];
+                attackCards.push(selectedCard);
+                botHand.splice(selectedCardIndex, 1);
+                gameStatistics.totalCardsPlayed++;
+                
+                updateStatusMessage(`🤖 Бот атаковал: ${selectedCard.value} ${suitSymbols[selectedCard.suit]}. Ваша очередь защищаться.`);
+                playSound('card');
+                
+                isPlayerTurn = true;
+                isAttackPhase = false;
+                playerHasActed = false;
+                
+                updateUI();
+            }, 1000);
+        }
+
+        // Бот защищается (в зависимости от уровня)
+        function botDefend() {
+            if (isPlayerTurn || gameOver) return;
+            
+            updateStatusMessage("🤖 Бот защищается...");
+            
+            // Через 1 секунду бот делает ход
+            setTimeout(() => {
+                // Защита от каждой карты атаки
+                let allDefended = true;
+                
+                for (let i = defendCards.length; i < attackCards.length; i++) {
+                    const attackingCard = attackCards[i];
+                    let defendingCardIndex = -1;
+                    
+                    // Стратегия защиты в зависимости от уровня
+                    if (botLevel === 'easy') {
+                        // Легкий уровень: первая подходящая карта
+                        for (let j = 0; j < botHand.length; j++) {
+                            const card = botHand[j];
+                            if (canDefend(attackingCard, card)) {
+                                defendingCardIndex = j;
+                                break;
+                            }
+                        }
+                    } else if (botLevel === 'medium') {
+                        // Средний уровень: самая младшая подходящая карта
+                        for (let j = 0; j < botHand.length; j++) {
+                            const card = botHand[j];
+                            if (canDefend(attackingCard, card)) {
+                                if (defendingCardIndex === -1 || cardValues.indexOf(card.value) < cardValues.indexOf(botHand[defendingCardIndex].value)) {
+                                    defendingCardIndex = j;
+                                }
+                            }
+                        }
+                    } else {
+                        // Сложный уровень: стратегическая защита
+                        // 1. Предпочитает младшие некозырные карты
+                        let minNonTrumpIndex = -1;
+                        for (let j = 0; j < botHand.length; j++) {
+                            const card = botHand[j];
+                            if (canDefend(attackingCard, card) && card.suit !== trumpSuit) {
+                                if (minNonTrumpIndex === -1 || cardValues.indexOf(card.value) < cardValues.indexOf(botHand[minNonTrumpIndex].value)) {
+                                    minNonTrumpIndex = j;
+                                }
+                            }
+                        }
+                        
+                        if (minNonTrumpIndex !== -1) {
+                            defendingCardIndex = minNonTrumpIndex;
+                        } else {
+                            // 2. Выбирает младшую козырную карту
+                            for (let j = 0; j < botHand.length; j++) {
+                                const card = botHand[j];
+                                if (canDefend(attackingCard, card)) {
+                                    if (defendingCardIndex === -1 || cardValues.indexOf(card.value) < cardValues.indexOf(botHand[defendingCardIndex].value)) {
+                                        defendingCardIndex = j;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Если найдена подходящая карта для защиты
+                    if (defendingCardIndex !== -1) {
+                        const defendingCard = botHand[defendingCardIndex];
+                        defendCards.push(defendingCard);
+                        botHand.splice(defendingCardIndex, 1);
+                        gameStatistics.totalCardsPlayed++;
+                        
+                        updateStatusMessage(`🤖 Бот защитился: ${attackingCard.value}${suitSymbols[attackingCard.suit]} → ${defendingCard.value}${suitSymbols[defendingCard.suit]}`);
+                    } else {
+                        // Не может защититься, должен взять все карты
+                        updateStatusMessage("🤖 Бот не может защититься и берет все карты.");
+                        botHand = botHand.concat(attackCards, defendCards);
+                        attackCards = [];
+                        defendCards = [];
+                        allDefended = false;
+                        playSound('card');
+                        break;
+                    }
+                }
+                
+                if (allDefended) {
+                    // Все карты атаки защищены
+                    updateStatusMessage("🤖 Бот защитился от всех карт атаки. Теперь ваш ход.");
+                    
+                    // Пополнить руки
+                    refillHands();
+                    
+                    // Передать ход игроку
+                    isPlayerTurn = true;
+                    isAttackPhase = true;
+                    playerHasActed = false;
+                    
+                    updateUI();
+                } else {
+                    // Бот взял карты, теперь ход игрока
+                    updateStatusMessage("🤖 Бот взял карты. Теперь ваш ход.");
+                    
+                    // Пополнить руки
+                    refillHands();
+                    
+                    // Передать ход игроку
+                    isPlayerTurn = true;
+                    isAttackPhase = true;
+                    playerHasActed = false;
+                    
+                    updateUI();
+                }
+            }, 1000);
+        }
+
+        // Показать подсказку
+        function showHint() {
+            if (!isPlayerTurn || gameOver || playerHasActed) return;
+            
+            if (isAttackPhase) {
+                // Подсказка для фазы атаки
+                if (attackCards.length === 0) {
+                    updateStatusMessage("💡 Подсказка: для первой атаки выберите младшую карту. Старайтесь сохранять козыри.");
+                    
+                    // Показать лучшую карту
+                    let bestCardIndex = -1;
+                    for (let i = 0; i < playerHand.length; i++) {
+                        if (playerHand[i].suit !== trumpSuit) {
+                            if (bestCardIndex === -1 || cardValues.indexOf(playerHand[i].value) < cardValues.indexOf(playerHand[bestCardIndex].value)) {
+                                bestCardIndex = i;
+                            }
+                        }
+                    }
+                    
+                    // Если остались только козырные карты
+                    if (bestCardIndex === -1) {
+                        bestCardIndex = 0;
+                    }
+                    
+                    // Подсветить карту
+                    highlightSpecificCard(bestCardIndex, '#4CAF50');
+                } else {
+                    updateStatusMessage("💡 Подсказка: выберите карту того же достоинства, что и на столе. Предпочитайте младшие карты.");
+                }
+            } else {
+                // Подсказка для фазы защиты
+                if (attackCards.length > defendCards.length) {
+                    const attackingCard = attackCards[defendCards.length];
+                    updateStatusMessage(`💡 Подсказка: для защиты от ${attackingCard.value}${suitSymbols[attackingCard.suit]} выберите карту большего достоинства той же масти или козырь.`);
+                    
+                    // Показать лучшую карту для защиты
+                    let bestDefenseIndex = -1;
+                    for (let i = 0; i < playerHand.length; i++) {
+                        if (canDefend(attackingCard, playerHand[i])) {
+                            if (bestDefenseIndex === -1 || cardValues.indexOf(playerHand[i].value) < cardValues.indexOf(playerHand[bestDefenseIndex].value)) {
+                                bestDefenseIndex = i;
+                            }
+                        }
+                    }
+                    
+                    if (bestDefenseIndex !== -1) {
+                        highlightSpecificCard(bestDefenseIndex, '#2196F3');
+                    }
+                }
+            }
+            playSound('click');
+        }
+        
+        // Подсветить конкретную карту
+        function highlightSpecificCard(index, color) {
+            const playerCardsContainer = document.getElementById('player-cards');
+            const cards = playerCardsContainer.querySelectorAll('.card');
+            
+            if (cards[index]) {
+                const card = cards[index];
+                card.style.boxShadow = `0 0 20px ${color}`;
+                card.style.border = `3px solid ${color}`;
+                card.style.transform = 'translateY(-10px)';
+                
+                // Убрать подсветку через 3 секунды
+                setTimeout(() => {
+                    updateUI();
+                }, 3000);
+            }
+        }
+
+        // Пополнить руки картами
+        function refillHands() {
+            // Пополнить руку игрока
+            while (playerHand.length < 6 && deck.length > 0) {
+                playerHand.push(deck.shift());
+            }
+            
+            // Пополнить руку бота
+            while (botHand.length < 6 && deck.length > 0) {
+                botHand.push(deck.shift());
+            }
+        }
+
+        // Запустить таймер хода
+        function startTurnTimer() {
+            turnTimer = 30;
+            document.getElementById('timer').textContent = turnTimer;
+            
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                if (!gameOver && isPlayerTurn) {
+                    turnTimer--;
+                    document.getElementById('timer').textContent = turnTimer;
+                    
+                    if (turnTimer <= 10) {
+                        document.getElementById('turn-timer').style.borderColor = '#F44336';
+                        document.getElementById('turn-timer').style.backgroundColor = 'rgba(244, 67, 54, 0.3)';
+                    }
+                    
+                    if (turnTimer <= 0) {
+                        clearInterval(timerInterval);
+                        updateStatusMessage("⏰ Время вышло! Автоматический ход.");
+                        
+                        // Автоматический выбор карты
+                        if (isAttackPhase && attackCards.length === 0) {
+                            autoSelectCard();
+                            setTimeout(() => {
+                                if (selectedCardIndex !== -1) {
+                                    playerAttack();
+                                } else {
+                                    playerTake();
+                                }
+                            }, 500);
+                        } else if (!isAttackPhase && defendCards.length < attackCards.length) {
+                            autoSelectCard();
+                            setTimeout(() => {
+                                if (selectedCardIndex !== -1) {
+                                    playerDefend();
+                                } else {
+                                    playerTake();
+                                }
+                            }, 500);
+                        } else {
+                            playerReady();
+                        }
+                    }
+                }
+            }, 1000);
+        }
+
+        // Проверить окончание игры
+        function checkGameEnd() {
+            // Если в колоде нет карт и у одного из игроков нет карт
+            if (deck.length === 0) {
+                if (playerHand.length === 0 && botHand.length === 0) {
+                    showGameResult("🤝 Ничья! Оба игрока остались без карт.");
+                    gameStatistics.draws++;
+                    return true;
+                } else if (playerHand.length === 0) {
+                    showGameResult("🎉 Поздравляем! Вы победили!");
+                    gameStatistics.wins++;
+                    gameStatistics.currentStreak++;
+                    if (gameStatistics.currentStreak > gameStatistics.bestWinStreak) {
+                        gameStatistics.bestWinStreak = gameStatistics.currentStreak;
+                    }
+                    playSound('win');
+                    return true;
+                } else if (botHand.length === 0) {
+                    showGameResult("🤖 Актилек победил. В следующий раз повезет!");
+                    gameStatistics.losses++;
+                    gameStatistics.currentStreak = 0;
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // Показать результат игры
+        function showGameResult(message) {
+            gameOver = true;
+            gameStatistics.totalGames++;
+            
+            if (timerInterval) clearInterval(timerInterval);
+            
+            document.getElementById('result-message').textContent = message;
+            document.getElementById('game-result').classList.remove('hidden');
+        }
+
+        // Показать статистику
+        function showStatistics() {
+            const winRate = gameStatistics.totalGames > 0 
+                ? Math.round((gameStatistics.wins / gameStatistics.totalGames) * 100) 
+                : 0;
+            
+            document.getElementById('total-games').textContent = gameStatistics.totalGames;
+            document.getElementById('wins').textContent = gameStatistics.wins;
+            document.getElementById('losses').textContent = gameStatistics.losses;
+            document.getElementById('draws').textContent = gameStatistics.draws;
+            document.getElementById('win-rate').textContent = winRate + '%';
+            document.getElementById('best-streak').textContent = gameStatistics.bestWinStreak;
+            document.getElementById('total-cards-played').textContent = gameStatistics.totalCardsPlayed;
+            
+            document.getElementById('game-result').classList.add('hidden');
+            document.getElementById('statistics-window').classList.remove('hidden');
+            playSound('click');
+        }
+
+        // Закрыть статистику
+        function closeStatistics() {
+            document.getElementById('statistics-window').classList.add('hidden');
+            document.getElementById('game-result').classList.remove('hidden');
+            playSound('click');
+        }
+
+        // Обновить статусное сообщение
+        function updateStatusMessage(message) {
+            document.getElementById('status-message').textContent = message;
+        }
+
+        // Начать новую игру
+        function startNewGame() {
+            document.getElementById('game-result').classList.add('hidden');
+            document.getElementById('statistics-window').classList.add('hidden');
+            initGame();
+        }
+
+        // Начать игру при загрузке страницы
+        window.onload = function() {
+            // Загрузить статистику из localStorage
+            const savedStats = localStorage.getItem('foolGameStatistics');
+            if (savedStats) {
+                gameStatistics = JSON.parse(savedStats);
+            }
+            
+            initGame();
+            // Автоматически открыть правила
+            setTimeout(() => {
+                toggleRules();
+            }, 500);
+            
+            // Сохранять статистику при закрытии страницы
+            window.addEventListener('beforeunload', () => {
+                localStorage.setItem('foolGameStatistics', JSON.stringify(gameStatistics));
+            });
+        };
+    </script>
+
+</body></html>
